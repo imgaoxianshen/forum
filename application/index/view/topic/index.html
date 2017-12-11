@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>论坛</title>
+    <link rel="stylesheet" href="/TP5_forum/public/static/css/all-df86af5803.css">
+</head>
+<body class="forum" data-page="forum">
+<div class="header">
+    <nav class="navbar navbar-inverse navbar-fixed-top navbar-default">
+        <div class="container">
+            <div class="navbar-header" id="navbar-header">
+                <a href="index.html" class="navbar-brand"><img src="static/images/logo.png">
+                </a>
+            </div>
+            <div id="main-nav-menu">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="index.html"><i class="fa fa-home"></i> <span
+                            class="hidden-xs hidden-sm">首页</span></a></li>
+                    <li class="hidden-sm hidden-xs"><a href="<?=url('topic/newTopic');?>"><i class="fa fa-comments-o"></i> 发表新帖</a></li>
+
+                </ul>
+            </div>
+            <?php $page =isset($page)?$page:1;?>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="nav-search hidden-xs hidden-sm">
+                    <form method="GET" action="<?=url('topic/search').'?page='.$page;?>" accept-charset="UTF-8"
+                          class="navbar-form form-search active" target="_blank">
+                        <div class="form-group">
+                            <input placeholder="搜索" class="form-control" name="keyword" type="search">
+                        </div>
+                        <i class="fa fa-search"></i>
+                    </form>
+                </li>
+                <li class="dropdown">
+            <?php if(empty(session('user'))){?>
+                          <li ><a href="register.html" id="signup-btn">注册</a></li>
+                    <li class="active"><a href="<?=url('index/login');?>" id="login-btn">登录</a></li>
+
+            <?php }else{?>
+                          <li ><a href="<?=url('user/avatar');?>" id="signup-btn"><?php echo session('user')['name']?></a></li>
+                    <li class="active"><a href="<?=url('index/logout');?>" id="login-btn">退出</a></li>
+
+              <?php }?>
+            </ul>
+        </div>
+    </nav>
+</div>
+<div id="main" class="main-container container">
+    <!-- 首页通栏(4个推荐位) -->
+    <div class="col-md-9 threads-index main-col">
+        <div class="panel panel-default">
+
+            <div class="panel-heading">
+                <div class="pull-left hidden-sm hidden-xs">
+                    <i class="fa fa-list"></i> 首页
+                </div>
+                <ul class="pull-right list-inline remove-margin-bottom thread-filter">
+                    <li>
+                        <a href="searchByTime.html">
+                            <i class="fa fa-history"></i> 最新话题
+                        </a>
+                    </li>
+                    <li>
+                        <a href="searchByParise.html">
+                            <i class="fa fa-thumbs-o-up"> </i> 最多按赞
+                        </a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+
+
+            <div class="panel-body remove-padding-horizontal">
+                <ul class="list-group row thread-list">
+
+                <?php foreach($topics as $topic):?>
+                    <li class="list-group-item media " style="margin-top: 0px;">
+                        <a class="pull-right" href="<?=url('topic/detail')?>?id=<?=$topic->id?>"><span class="badge badge-reply-count"> <?php echo $topic->replies_count?></span>
+                        </a>
+                        <div class="avatar pull-left">
+                            <a href="<?=url('topic/detail')?>?id=<?=$topic->id?>">
+                                <img class="media-object img-thumbnail avatar-48" alt="imooc" src="__UPLOAD__/<?=$topic->user->avatar?>"/>
+                            </a>
+                        </div>
+                        <div class="infos">
+                            <div class="media-heading">
+                                <i class="fa fa-thumb-tack text-danger"></i>
+                                <a href="<?=url('topic/detail')?>?id=<?=$topic->id?>" title="imooc 接下来需要完善的功能">
+                                    <?=$topic->title;?>
+                                </a>
+                            </div>
+                            <div class="media-body meta">
+                                <a href="<?=url('topic/praise');?>?topicId=<?=$topic->id;?>">
+                                    <span class="fa fa-thumbs-o-up"> <?=$topic->praises_count?> </span>
+                                </a>
+                                <span> • </span>
+
+                                <a href="thread.html">
+                                    版块
+                                </a>
+                                <span> • </span>
+                                <!-- <span> • </span> -->
+                                <?php $categorys = getCategoryNames($topic->category_id);?>
+                                <span class="tag-list hidden-xs">
+                                <a href="tag.html"><span class="tag"><?=$categorys[0]?></span></a>
+                            <span> /</span>
+            </span>
+            <span class="tag-list hidden-xs">
+                                <a href="tag.html"><span class="tag"><?=$categorys[1]?></span></a>
+                                <span> • </span>
+                                <a href="javascript:void">
+                                    <?=$topic->user->name;?>
+                                </a>
+                                <span> • </span>
+                                <span class="timeago " data-toggle="tooltip" data-placement="top"
+                                      title="<?=date('Y-m-d H:i:s',$topic->created_at)?>"><?=date('Y-m-d H:i:s',$topic->created_at)?></span>
+                            </div>
+                        </div>
+                    </li>
+
+            <?php endforeach;?>       
+
+                </ul>
+
+            </div>
+
+            <div class="panel-footer text-right remove-padding-horizontal pager-footer">
+            <?php $keyword=isset($keyword)?$keyword:'';?>
+            <?php $tagId =isset($tagId)?$tagId:'';?>
+                <!-- Pager -->
+                <ul class="pagination">
+                {if($page <=1)}
+                    <li class="disabled"><span>&laquo;</span></li>
+                {else /}
+                    <li><a href="?page=1&keyword=<?=$keyword?>&tag=<?=$tagId?>"><span>&laquo;</span></a></li>
+                {/if}
+                <?php $showPages = isset($showPages) ? $showPages : [];?>
+                <?php foreach($showPages as $showPage):?>
+                {if($page ==$showPage)}
+                    <li class="active"><span><?=$page?></span></li>
+                {else/}    
+                    <li><a href="?page=<?=$showPage?>&keyword=<?=$keyword?>&tag=<?=$tagId?>"><?=$showPage;?></a></li>
+                {/if}    
+                <?php endforeach;?>
+                <?php $pageNum=isset($pageNum) ? $pageNum : 0;?>
+                {if($page < $pageNum)}
+                    <li><a href="?page=<?=$pageNum?>" rel="next">&raquo;</a></li>
+                {else/}
+                    <li class="disabled"><span>&raquo;</span></li>
+                {/if}
+
+                </ul>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="col-md-3 side-bar">
+    <?php if(empty($user)):?>
+        <div class="panel panel-default corner-radius">
+            <div class="panel-heading">
+                <h3 class="panel-title">BBS</h3>
+            </div>
+            <div class="panel-body text-center">
+                <a href="register.html" class="btn btn-primary">
+                    <i class="fa fa-user"> </i> 注册
+                </a>
+            </div>
+            <div class="panel-footer text-center">
+                已注册用户请 <a href="login.html">登录</a>
+            </div>
+        </div>
+    <?php endif;?>
+        <div class="panel panel-default corner-radius">
+            <div class="panel-heading">
+                <h3 class="panel-title">热门标签</h3>
+            </div>
+            <div class="panel-body">
+            <?php $hotTags = isset($hotTags) ? $hotTags :[];?>
+            <?php foreach($hotTags as $hotTag):?>
+                <div class="badge badge-tag-cloud">
+                {if ($hotTag->tag_id !=$tagId)}
+                    <a href="<?=url('topic/tag');?>?tag=<?=$hotTag->tag_id?>"><?=$hotTag->tag->name;?></a> (<?=$hotTag->topicNum;?>)
+                {else/}
+                <span><?=$hotTag->tag->name;?></span>(<?=$hotTag->topicNum;?>)
+                {/if}
+                </div>
+            <?php endforeach;?>
+            </div>
+        </div>
+        <div class="panel panel-default corner-radius">
+            <div class="panel-heading">
+                <h3 class="panel-title">小贴士</h3>
+            </div>
+            <div class="panel-body">
+                <?=$tipscontent;?>
+            </div>
+        </div>
+
+        <div class="panel panel-default corner-radius">
+            <div class="panel-heading">
+                <h3 class="panel-title">统计信息</h3>
+            </div>
+            <ul class="list-group">
+                <li class="list-group-item">社区会员: <?=$usercount;?></li>
+                <li class="list-group-item">主题数: <?=$tagcount;?></li>
+                <li class="list-group-item">回帖数: <?=$replycount;?></li>
+            </ul>
+        </div>
+
+
+    </div>
+    <div class="clearfix"></div>
+
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="copyright">
+            <blockquote class="pull-left">
+                <p>论坛</p>
+                <p>Copyright &copy; 2017-2018 <a href="index.html">gaofeng</a> 1.0.0-rc2 <span class="pipe">|</span><span class="pipe">|</span></p>
+            </blockquote>
+        </div>
+        <div class="pull-right hidden-sm hidden-xs">
+            <p>
+                <a href="###">关于我们</a>
+                <span class="pipe">|</span>
+                <a href="###">联系我们</a>
+                <span class="pipe">|</span>
+                <a href="###">常见问题解答</a>
+            </p>
+
+        </div>
+    </div>
+</footer>
+</body>
+</html>
